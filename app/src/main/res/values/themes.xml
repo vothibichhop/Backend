@@ -7,6 +7,10 @@
 
     <style name="Theme.DuAnNhom" parent="Base.Theme.DuAnNhom" />
 
+    <style name="CustomDialogTheme" parent="Theme.Material3.Light.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
     <!-- Product Item Styles -->
     <style name="ProductItemStyle">
         <item name="android:layout_width">0dp</item>

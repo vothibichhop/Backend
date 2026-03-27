@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5">
+    android:background="#FFFFFF">
 
     <!-- Header -->
     <RelativeLayout
@@ -69,6 +69,17 @@
         android:layout_below="@id/dividerHeader"
         android:padding="8dp" />
 
+    <!-- Empty State -->
+    <TextView
+        android:id="@+id/tvEmptyCart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="Giỏ hàng của bạn đang trống"
+        android:textColor="#9E9E9E"
+        android:textSize="14sp"
+        android:visibility="gone" />
+
     <!-- Bottom Section -->
     <LinearLayout
         android:id="@+id/llBottomCart"
@@ -99,7 +110,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
-                android:text="199,000đ"
+                android:text="0đ"
                 android:textColor="#000000"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -109,7 +120,7 @@
             android:id="@+id/btnCheckout"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:backgroundTint="#1E88E5"
+            android:backgroundTint="#2196F3"
             android:text="Thanh toán ngay"
             android:textAllCaps="false"
             android:textColor="#FFFFFF"

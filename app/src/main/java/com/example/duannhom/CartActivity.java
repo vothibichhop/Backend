@@ -1,6 +1,8 @@
 package com.example.duannhom;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -13,9 +15,10 @@ import java.util.List;
 
 public class CartActivity extends AppCompatActivity {
 
-    private TextView tvTotalPrice;
+    private TextView tvTotalPrice, tvEmptyCart;
     private List<CartItem> cartItems;
     private CartAdapter adapter;
+    private RecyclerView rvCartItems;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,7 +27,8 @@ public class CartActivity extends AppCompatActivity {
 
         ImageView ivBack = findViewById(R.id.ivBackCart);
         tvTotalPrice = findViewById(R.id.tvTotalPrice);
-        RecyclerView rvCartItems = findViewById(R.id.rvCartItems);
+        tvEmptyCart = findViewById(R.id.tvEmptyCart);
+        rvCartItems = findViewById(R.id.rvCartItems);
         TextView tvClearAll = findViewById(R.id.tvClearAll);
 
         ivBack.setOnClickListener(v -> finish());
@@ -35,28 +39,52 @@ public class CartActivity extends AppCompatActivity {
         cartItems.add(new CartItem(R.drawable.th, "Sữa chua việt quất", "Lốc 4 hộp", 28000, 3));
 
         adapter = new CartAdapter(cartItems, totalPrice -> {
-            DecimalFormat formatter = new DecimalFormat("#,###");
-            tvTotalPrice.setText(formatter.format(totalPrice).replace(",", ".") + "đ");
+            updateUI();
         });
 
         rvCartItems.setLayoutManager(new LinearLayoutManager(this));
         rvCartItems.setAdapter(adapter);
 
-        updateTotal();
+        updateUI();
 
         tvClearAll.setOnClickListener(v -> {
-            cartItems.clear();
-            adapter.notifyDataSetChanged();
-            updateTotal();
+            if (!cartItems.isEmpty()) {
+                showClearAllDialog();
+            }
         });
     }
 
-    private void updateTotal() {
+    private void showClearAllDialog() {
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_clear_all, null);
+        AlertDialog dialog = new AlertDialog.Builder(this, R.style.CustomDialogTheme)
+                .setView(dialogView)
+                .create();
+
+        dialogView.findViewById(R.id.btnCancelClear).setOnClickListener(v -> dialog.dismiss());
+        dialogView.findViewById(R.id.btnConfirmClear).setOnClickListener(v -> {
+            cartItems.clear();
+            adapter.notifyDataSetChanged();
+            updateUI();
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+
+    private void updateUI() {
         long total = 0;
         for (CartItem item : cartItems) {
             total += item.price * item.quantity;
         }
         DecimalFormat formatter = new DecimalFormat("#,###");
         tvTotalPrice.setText(formatter.format(total).replace(",", ".") + "đ");
+
+        if (cartItems.isEmpty()) {
+            tvEmptyCart.setVisibility(View.VISIBLE);
+            rvCartItems.setVisibility(View.GONE);
+        } else {
+            tvEmptyCart.setVisibility(View.GONE);
+            rvCartItems.setVisibility(View.VISIBLE);
+        }
     }
 }

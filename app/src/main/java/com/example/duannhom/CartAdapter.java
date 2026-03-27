@@ -1,5 +1,6 @@
 package com.example.duannhom;
 
+import android.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,8 +54,31 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
                 item.quantity--;
                 notifyItemChanged(position);
                 updateTotal();
+            } else {
+                showRemoveDialog(holder.itemView, position);
             }
         });
+    }
+
+    private void showRemoveDialog(View view, int position) {
+        View dialogView = LayoutInflater.from(view.getContext()).inflate(R.layout.dialog_remove_item, null);
+        AlertDialog dialog = new AlertDialog.Builder(view.getContext(), R.style.CustomDialogTheme)
+                .setView(dialogView)
+                .create();
+
+        dialogView.findViewById(R.id.btnCancel).setOnClickListener(v -> dialog.dismiss());
+        dialogView.findViewById(R.id.btnConfirm).setOnClickListener(v -> {
+            list.remove(position);
+            notifyItemRemoved(position);
+            notifyItemRangeChanged(position, list.size());
+            updateTotal();
+            dialog.dismiss();
+        });
+
+        dialog.show();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
     }
 
     private void updateTotal() {
