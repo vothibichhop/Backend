@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+    <!-- Header Blue Area -->
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:background="#2196F3"
+        android:orientation="vertical"
+        android:padding="10dp">
+
+        <ImageView
+            android:layout_width="60dp"
+            android:layout_height="30dp"
+            android:src="@drawable/logo"
+            android:background="#FFFFFF"
+            android:padding="2dp"
+            android:scaleType="centerInside"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tinh tuý từ thiên nhiên - nuôi dưỡng mỗi ngày"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="italic"
+            android:gravity="center"
+            android:layout_marginTop="10dp"/>
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@android:drawable/ic_menu_gallery"
+            android:layout_gravity="start"
+            app:tint="#8BC34A"/>
+    </LinearLayout>
+
+    <!-- Cart and Search Bar -->
+    <LinearLayout
+        android:id="@+id/actionArea"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/header"
+        android:orientation="vertical"
+        android:background="#FFFFFF"
+        android:padding="10dp">
+
+        <!-- Cart and Notification Bar -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingVertical="5dp">
+
+            <ImageView
+                android:id="@+id/imgCart"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_cart"
+                android:layout_alignParentStart="true"
+                app:tint="#FF0000"/>
+
+            <TextView
+                android:id="@+id/tvBadge"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:background="#FF0000"
+                android:text="3"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"/>
+        </RelativeLayout>
+
+        <!-- Search Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:orientation="horizontal"
+            android:layout_marginTop="5dp"
+            android:gravity="center_vertical">
+
+            <EditText
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/bg_input"
+                android:hint="Bạn muốn tìm sản phẩm gì?"
+                android:paddingHorizontal="15dp"
+                android:textSize="14sp"/>
+
+            <ImageView
+                android:id="@+id/btnSearch"
+                android:layout_width="45dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="10dp"
+                android:background="#2196F3"
+                android:src="@android:drawable/ic_menu_search"
+                android:padding="10dp"
+                app:tint="#FFFFFF"
+                android:clickable="true"
+                android:focusable="true"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Product Grid -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/bottomNav"
+        android:layout_below="@id/actionArea">
+
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="3"
+            android:padding="5dp">
+
+            <!-- Item 1 -->
+            <LinearLayout style="@style/ProductItemStyle">
+                <ImageView style="@style/ProductImageStyle" android:src="@drawable/thtruemilk"/>
+                <TextView style="@style/ProductTitleStyle" android:text="Sữa tươi tiệt trùng"/>
+                <TextView style="@style/ProductSubStyle" android:text="180 ml, Thùng 48 hộp"/>
+                <TextView style="@style/ProductPriceStyle" android:text="430.000đ -7%"/>
+                <Button style="@style/ProductButtonStyle" android:text="Chọn sản phẩm"/>
+            </LinearLayout>
+
+            <!-- Item 2 -->
+            <LinearLayout style="@style/ProductItemStyle">
+                <ImageView style="@style/ProductImageStyle" android:src="@drawable/thtruemilk"/>
+                <TextView style="@style/ProductTitleStyle" android:text="Sữa bột người lớn"/>
+                <TextView style="@style/ProductSubStyle" android:text="900g, Lẻ 1 lon"/>
+                <TextView style="@style/ProductPriceStyle" android:text="490.000đ -7%"/>
+                <Button style="@style/ProductButtonStyle" android:text="Chọn sản phẩm"/>
+            </LinearLayout>
+
+            <!-- Item 3 -->
+            <LinearLayout style="@style/ProductItemStyle">
+                <ImageView style="@style/ProductImageStyle" android:src="@drawable/thtruemilk"/>
+                <TextView style="@style/ProductTitleStyle" android:text="Sữa bột người lớn"/>
+                <TextView style="@style/ProductSubStyle" android:text="900g, Lẻ 1 lon"/>
+                <TextView style="@style/ProductPriceStyle" android:text="490.000đ -7%"/>
+                <Button style="@style/ProductButtonStyle" android:text="Chọn sản phẩm"/>
+            </LinearLayout>
+
+            <!-- Item 4 -->
+            <LinearLayout style="@style/ProductItemStyle">
+                <ImageView style="@style/ProductImageStyle" android:src="@drawable/thtruemilk"/>
+                <TextView style="@style/ProductTitleStyle" android:text="Sữa tươi tiệt trùng"/>
+                <TextView style="@style/ProductSubStyle" android:text="180 ml, Thùng 48 hộp"/>
+                <TextView style="@style/ProductPriceStyle" android:text="300.000đ -7%"/>
+                <Button style="@style/ProductButtonStyle" android:text="Chọn sản phẩm"/>
+            </LinearLayout>
+
+            <!-- Item 5 -->
+            <LinearLayout style="@style/ProductItemStyle">
+                <ImageView style="@style/ProductImageStyle" android:src="@drawable/thtruemilk"/>
+                <TextView style="@style/ProductTitleStyle" android:text="Sữa tươi tiệt trùng"/>
+                <TextView style="@style/ProductSubStyle" android:text="180 ml, Thùng 48 hộp"/>
+                <TextView style="@style/ProductPriceStyle" android:text="300.000đ -7%"/>
+                <Button style="@style/ProductButtonStyle" android:text="Chọn sản phẩm"/>
+            </LinearLayout>
+
+            <!-- Item 6 -->
+            <LinearLayout style="@style/ProductItemStyle">
+                <ImageView style="@style/ProductImageStyle" android:src="@drawable/thtruemilk"/>
+                <TextView style="@style/ProductTitleStyle" android:text="Sữa đặc nguyên chất"/>
+                <TextView style="@style/ProductSubStyle" android:text="100g, Lẻ 1 hộp"/>
+                <TextView style="@style/ProductPriceStyle" android:text="50.000đ -7%"/>
+                <Button style="@style/ProductButtonStyle" android:text="Chọn sản phẩm"/>
+            </LinearLayout>
+
+            <!-- Item 7 -->
+            <LinearLayout style="@style/ProductItemStyle">
+                <ImageView style="@style/ProductImageStyle" android:src="@drawable/thtruemilk"/>
+                <TextView style="@style/ProductTitleStyle" android:text="Sữa chua ăn"/>
+                <TextView style="@style/ProductSubStyle" android:text="100 g, Thùng 48 hộp"/>
+                <TextView style="@style/ProductPriceStyle" android:text="50.000đ -7%"/>
+                <Button style="@style/ProductButtonStyle" android:text="Chọn sản phẩm"/>
+            </LinearLayout>
+
+            <!-- Item 8 -->
+            <LinearLayout style="@style/ProductItemStyle">
+                <ImageView style="@style/ProductImageStyle" android:src="@drawable/thtruemilk"/>
+                <TextView style="@style/ProductTitleStyle" android:text="Sữa thực vật"/>
+                <TextView style="@style/ProductSubStyle" android:text="180 ml, Thùng 48 hộp"/>
+                <TextView style="@style/ProductPriceStyle" android:text="50.000đ -7%"/>
+                <Button style="@style/ProductButtonStyle" android:text="Chọn sản phẩm"/>
+            </LinearLayout>
+
+            <!-- Item 9 -->
+            <LinearLayout style="@style/ProductItemStyle">
+                <ImageView style="@style/ProductImageStyle" android:src="@drawable/thtruemilk"/>
+                <TextView style="@style/ProductTitleStyle" android:text="Sữa bột trẻ em"/>
+                <TextView style="@style/ProductSubStyle" android:text="800g, Lẻ 1 lon"/>
+                <TextView style="@style/ProductPriceStyle" android:text="300.000đ -7%"/>
+                <Button style="@style/ProductButtonStyle" android:text="Chọn sản phẩm"/>
+            </LinearLayout>
+
+        </GridLayout>
+    </ScrollView>
+
+    <!-- Bottom Navigation -->
+    <LinearLayout
+        android:id="@+id/bottomNav"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:layout_alignParentBottom="true"
+        android:background="#FFFFFF"
+        android:elevation="10dp"
+        android:orientation="horizontal">
+
+        <LinearLayout style="@style/NavItemStyle">
+            <ImageView style="@style/NavIconStyle" android:src="@android:drawable/ic_menu_myplaces" app:tint="#2196F3"/>
+            <TextView style="@style/NavTextStyle" android:text="Trang chủ" android:textColor="#2196F3"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/navCategory"
+            style="@style/NavItemStyle">
+            <ImageView style="@style/NavIconStyle" android:src="@android:drawable/ic_menu_sort_by_size"/>
+            <TextView style="@style/NavTextStyle" android:text="Danh mục"/>
+        </LinearLayout>
+
+        <LinearLayout style="@style/NavItemStyle">
+            <ImageView style="@style/NavIconStyle" android:src="@android:drawable/ic_menu_agenda"/>
+            <TextView style="@style/NavTextStyle" android:text="Đơn hàng"/>
+        </LinearLayout>
+
+        <LinearLayout style="@style/NavItemStyle">
+            <ImageView style="@style/NavIconStyle" android:src="@android:drawable/ic_menu_myplaces"/>
+            <TextView style="@style/NavTextStyle" android:text="Tài khoản"/>
+        </LinearLayout>
+    </LinearLayout>
+
+</RelativeLayout>
