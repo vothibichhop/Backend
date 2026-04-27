@@ -8,7 +8,15 @@ from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .models import BannerQuangCao, ChiTietGioHang, DanhMucSanPham, DonHang, GioHang, Sua
+from .models import (
+    BannerQuangCao,
+    ChiTietDonHang,
+    ChiTietGioHang,
+    DanhMucSanPham,
+    DonHang,
+    GioHang,
+    Sua,
+)
 from .serializers import (
     BannerQuangCaoSerializer,
     CapNhatChiTietGioHangSerializer,
@@ -21,6 +29,7 @@ from .serializers import (
     GioHangSerializer,
     SuaListQuerySerializer,
     SuaListSerializer,
+    TaoDonHangSerializer,
     ThemSanPhamVaoGioHangSerializer,
 )
 
@@ -29,6 +38,24 @@ def _normalize_search_text(value):
     normalized = unicodedata.normalize("NFD", value or "")
     without_diacritics = "".join(char for char in normalized if unicodedata.category(char) != "Mn")
     return without_diacritics.casefold().strip()
+
+
+def _next_order_id():
+    max_value = 0
+    for order_id in DonHang.objects.values_list("id", flat=True):
+        if isinstance(order_id, str) and order_id.startswith("DH") and order_id[2:].isdigit():
+            max_value = max(max_value, int(order_id[2:]))
+    return f"DH{max_value + 1:03d}"
+
+
+def _cart_item_option_label(chi_tiet):
+    if chi_tiet.lua_chon_mua is not None:
+        return chi_tiet.lua_chon_mua.ten_lua_chon
+    if chi_tiet.sua.quy_cach:
+        return chi_tiet.sua.quy_cach
+    if chi_tiet.sua.trong_luong and chi_tiet.sua.don_vi:
+        return f"{chi_tiet.sua.trong_luong} {chi_tiet.sua.don_vi}"
+    return "Quy cach chuan"
 
 
 class SuaViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
@@ -265,6 +292,49 @@ class DonHangViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
     def get_queryset(self):
         return DonHang.objects.prefetch_related("san_pham__san_pham").order_by("-ngay_dat", "id")
+
+    def retrieve(self, request, pk=None):
+        don_hang = get_object_or_404(self.get_queryset(), id=pk)
+        serializer = self.get_serializer(don_hang, context={"request": request})
+        return Response(serializer.data)
+
+    def create(self, request):
+        serializer = TaoDonHangSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        with transaction.atomic():
+            gio_hang = serializer.validated_data["gio_hang"]
+            don_hang = DonHang.objects.create(
+                id=_next_order_id(),
+                ngay_dat=timezone.now(),
+                trang_thai="Cho xac nhan",
+                phuong_thuc_nhan=serializer.validated_data["phuong_thuc_nhan"],
+                ten_nguoi_nhan=serializer.validated_data["ten_nguoi_nhan"],
+                so_dien_thoai=serializer.validated_data["so_dien_thoai"],
+                dia_chi_giao_hang=serializer.validated_data["dia_chi_giao_hang"],
+                phuong_thuc_thanh_toan=serializer.validated_data["phuong_thuc_thanh_toan"],
+                tong_tien=0,
+            )
+
+            tong_tien = 0
+            for item in gio_hang.chi_tiet.select_related("sua", "lua_chon_mua"):
+                gia_ban = item.lua_chon_mua.don_gia if item.lua_chon_mua is not None else item.sua.don_gia
+                tong_tien += int(gia_ban) * item.so_luong
+                ChiTietDonHang.objects.create(
+                    don_hang=don_hang,
+                    san_pham=item.sua,
+                    so_luong=item.so_luong,
+                    gia_ban=gia_ban,
+                    ten_lua_chon=_cart_item_option_label(item),
+                )
+
+            don_hang.tong_tien = tong_tien
+            don_hang.save(update_fields=["tong_tien"])
+            gio_hang.chi_tiet.all().delete()
+            GioHang.objects.filter(ma_gio_hang=gio_hang.ma_gio_hang).update(cap_nhat_luc=timezone.now())
+
+        response_serializer = self.get_serializer(don_hang, context={"request": request})
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=["get"], url_path="lich-su-don-hang")
     def lich_su_don_hang(self, request):

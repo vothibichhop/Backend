@@ -57,4 +57,7 @@ public interface ApiService {
 
     @GET("api/banner-quang-cao")
     Call<List<Banner>> getPromoBanners();
+
+    @GET("api/lich-su-don-hang")
+    Call<List<OrderSummary>> getOrderHistory();
 }

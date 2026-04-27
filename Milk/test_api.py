@@ -293,6 +293,94 @@ class GioHangApiTests(APITestCase):
 
 
 class DonHangApiTests(APITestCase):
+    def test_create_order_from_cart_for_checkout_screen(self):
+        lua_chon_mac_dinh = LuaChonMuaSua.objects.get(sua_id="S01", mac_dinh=True)
+
+        tao_gio = self.client.post(
+            "/api/gio-hang",
+            {
+                "ma_sua": "S01",
+                "lua_chon_mua_id": lua_chon_mac_dinh.id,
+                "so_luong": 2,
+            },
+            format="json",
+        )
+        ma_gio_hang = tao_gio.data["ma_gio_hang"]
+
+        response = self.client.post(
+            "/api/don-hang",
+            {
+                "ma_gio_hang": ma_gio_hang,
+                "phuong_thuc_nhan": "giao_tan_noi",
+                "ten_nguoi_nhan": "Nguyen Van A",
+                "so_dien_thoai": "0912345678",
+                "dia_chi_giao_hang": "12 Thanh Thai, Quan 10, TP HCM",
+                "phuong_thuc_thanh_toan": "cod",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["id"], "DH004")
+        self.assertEqual(response.data["trang_thai"], "Ch\u1edd x\u00e1c nh\u1eadn")
+        self.assertEqual(response.data["trang_thai_code"], "cho_xac_nhan")
+        self.assertEqual(response.data["phuong_thuc_nhan"], "giao_tan_noi")
+        self.assertEqual(response.data["phuong_thuc_nhan_hien_thi"], "Giao tan noi")
+        self.assertEqual(response.data["ten_nguoi_nhan"], "Nguyen Van A")
+        self.assertEqual(response.data["so_dien_thoai"], "0912345678")
+        self.assertEqual(response.data["dia_chi_giao_hang"], "12 Thanh Thai, Quan 10, TP HCM")
+        self.assertEqual(response.data["phuong_thuc_thanh_toan"], "cod")
+        self.assertEqual(
+            response.data["phuong_thuc_thanh_toan_hien_thi"],
+            "Thanh toan khi nhan hang (COD)",
+        )
+        self.assertEqual(response.data["tong_tien"], 800000.0)
+        self.assertEqual(response.data["tong_tien_hien_thi"], "800.000\u0111")
+        self.assertEqual(response.data["tong_san_pham"], 2)
+        self.assertEqual(len(response.data["san_pham"]), 1)
+        self.assertEqual(response.data["san_pham"][0]["ten_lua_chon"], "Thung 48 hop")
+        self.assertEqual(response.data["san_pham"][0]["gia_ban_hien_thi"], "400.000\u0111")
+
+        gio_hang_sau_khi_dat = self.client.get(f"/api/gio-hang/{ma_gio_hang}")
+        self.assertEqual(gio_hang_sau_khi_dat.status_code, status.HTTP_200_OK)
+        self.assertEqual(gio_hang_sau_khi_dat.data["tong_mat_hang"], 0)
+        self.assertEqual(gio_hang_sau_khi_dat.data["items"], [])
+
+    def test_create_order_requires_address_when_shipping(self):
+        tao_gio = self.client.post(
+            "/api/gio-hang",
+            {
+                "ma_sua": "S10",
+                "so_luong": 1,
+            },
+            format="json",
+        )
+
+        response = self.client.post(
+            "/api/don-hang",
+            {
+                "ma_gio_hang": tao_gio.data["ma_gio_hang"],
+                "phuong_thuc_nhan": "giao_tan_noi",
+                "ten_nguoi_nhan": "Tran Thi B",
+                "so_dien_thoai": "0987654321",
+                "dia_chi_giao_hang": "",
+                "phuong_thuc_thanh_toan": "the_noi_dia",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("dia_chi_giao_hang", response.data)
+
+    def test_retrieve_order_detail_includes_checkout_information(self):
+        response = self.client.get("/api/don-hang/DH001")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["id"], "DH001")
+        self.assertEqual(response.data["phuong_thuc_nhan"], "giao_tan_noi")
+        self.assertEqual(response.data["phuong_thuc_thanh_toan"], "cod")
+        self.assertEqual(response.data["san_pham"][0]["ten_lua_chon"], "")
+
     def test_order_history_returns_nested_products_for_android(self):
         response = self.client.get("/api/lich-su-don-hang")
 
@@ -301,18 +389,29 @@ class DonHangApiTests(APITestCase):
         self.assertEqual(response.data[0]["id"], "DH001")
         self.assertEqual(response.data[0]["ngay_dat"], "04/02/2026 14:30")
         self.assertEqual(response.data[0]["trang_thai"], "\u0110ang giao")
+        self.assertEqual(response.data[0]["trang_thai_code"], "dang_giao")
         self.assertEqual(response.data[0]["tong_tien"], 199000.0)
+        self.assertEqual(response.data[0]["tong_tien_hien_thi"], "199.000\u0111")
+        self.assertEqual(response.data[0]["tong_san_pham"], 2)
+        self.assertEqual(response.data[0]["hanh_dong_chinh"]["ma"], "chi_tiet")
+        self.assertEqual(response.data[0]["hanh_dong_chinh"]["nhan"], "Chi ti\u1ebft")
         self.assertEqual(len(response.data[0]["san_pham"]), 2)
+        self.assertEqual(response.data[0]["san_pham"][0]["ma_sua"], "S10")
         self.assertIn("ten_sp", response.data[0]["san_pham"][0])
+        self.assertEqual(response.data[0]["san_pham"][0]["gia_ban_hien_thi"], "45.000\u0111")
         self.assertEqual(
             response.data[0]["san_pham"][0]["hinh_anh"],
             "http://10.0.2.2:8000/media/suas/SUABOT1.jpg",
         )
         self.assertEqual(response.data[1]["id"], "DH002")
         self.assertEqual(response.data[1]["trang_thai"], "Ho\u00e0n th\u00e0nh")
+        self.assertEqual(response.data[1]["trang_thai_code"], "hoan_thanh")
         self.assertEqual(response.data[1]["tong_tien"], 356000.0)
+        self.assertEqual(response.data[1]["hanh_dong_chinh"]["ma"], "danh_gia")
+        self.assertEqual(response.data[1]["hanh_dong_chinh"]["nhan"], "\u0110\u00e1nh gi\u00e1")
         self.assertEqual(len(response.data[1]["san_pham"]), 1)
         self.assertEqual(response.data[2]["id"], "DH003")
         self.assertEqual(response.data[2]["trang_thai"], "\u0110\u00e3 h\u1ee7y")
+        self.assertEqual(response.data[2]["trang_thai_code"], "da_huy")
         self.assertEqual(response.data[2]["tong_tien"], 490000.0)
         self.assertEqual(len(response.data[2]["san_pham"]), 1)

@@ -199,6 +199,11 @@ class DonHang(models.Model):
     id = models.CharField(max_length=20, primary_key=True)
     ngay_dat = models.DateTimeField()
     trang_thai = models.CharField(max_length=50)
+    phuong_thuc_nhan = models.CharField(max_length=30, default="giao_tan_noi")
+    ten_nguoi_nhan = models.CharField(max_length=100, blank=True)
+    so_dien_thoai = models.CharField(max_length=20, blank=True)
+    dia_chi_giao_hang = models.CharField(max_length=255, blank=True)
+    phuong_thuc_thanh_toan = models.CharField(max_length=30, default="cod")
     tong_tien = models.DecimalField(max_digits=12, decimal_places=1)
 
     class Meta:
@@ -223,6 +228,7 @@ class ChiTietDonHang(models.Model):
     )
     so_luong = models.PositiveIntegerField(default=1)
     gia_ban = models.DecimalField(max_digits=12, decimal_places=1)
+    ten_lua_chon = models.CharField(max_length=100, blank=True)
 
     class Meta:
         ordering = ["id"]

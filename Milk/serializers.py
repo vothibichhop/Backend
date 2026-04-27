@@ -18,6 +18,14 @@ def dinh_dang_tien(value):
 
 
 ANDROID_MEDIA_BASE_URL = settings.ANDROID_MEDIA_BASE_URL.rstrip("/")
+PHUONG_THUC_NHAN_CHOICES = {
+    "giao_tan_noi": "Giao tan noi",
+    "nhan_tai_cua_hang": "Nhan tai cua hang",
+}
+PHUONG_THUC_THANH_TOAN_CHOICES = {
+    "cod": "Thanh toan khi nhan hang (COD)",
+    "the_noi_dia": "The thanh toan noi dia",
+}
 
 
 def build_android_media_url(request, image_field):
@@ -30,6 +38,14 @@ def build_android_media_url(request, image_field):
     if request is not None:
         return request.build_absolute_uri(relative_url)
     return relative_url
+
+
+def hien_thi_phuong_thuc_nhan(value):
+    return PHUONG_THUC_NHAN_CHOICES.get(value, value)
+
+
+def hien_thi_phuong_thuc_thanh_toan(value):
+    return PHUONG_THUC_THANH_TOAN_CHOICES.get(value, value)
 
 
 class SuaListQuerySerializer(serializers.Serializer):
@@ -529,14 +545,75 @@ class GioHangSerializer(serializers.ModelSerializer):
         return dinh_dang_tien(self.get_tong_tien(obj))
 
 
+class TaoDonHangSerializer(serializers.Serializer):
+    ma_gio_hang = serializers.UUIDField()
+    phuong_thuc_nhan = serializers.ChoiceField(choices=tuple(PHUONG_THUC_NHAN_CHOICES.keys()))
+    ten_nguoi_nhan = serializers.CharField(max_length=100)
+    so_dien_thoai = serializers.CharField(max_length=20)
+    dia_chi_giao_hang = serializers.CharField(
+        max_length=255,
+        required=False,
+        allow_blank=True,
+        default="",
+    )
+    phuong_thuc_thanh_toan = serializers.ChoiceField(
+        choices=tuple(PHUONG_THUC_THANH_TOAN_CHOICES.keys())
+    )
+
+    def validate_so_dien_thoai(self, value):
+        digits = "".join(char for char in value if char.isdigit())
+        if len(digits) < 9 or len(digits) > 11:
+            raise serializers.ValidationError("So dien thoai khong hop le.")
+        return value.strip()
+
+    def validate_ten_nguoi_nhan(self, value):
+        value = value.strip()
+        if not value:
+            raise serializers.ValidationError("Ten nguoi nhan khong duoc de trong.")
+        return value
+
+    def validate(self, attrs):
+        try:
+            gio_hang = GioHang.objects.prefetch_related(
+                "chi_tiet__sua",
+                "chi_tiet__lua_chon_mua",
+            ).get(ma_gio_hang=attrs["ma_gio_hang"])
+        except GioHang.DoesNotExist as exc:
+            raise serializers.ValidationError({"ma_gio_hang": "Gio hang khong ton tai."}) from exc
+
+        if not gio_hang.chi_tiet.exists():
+            raise serializers.ValidationError({"ma_gio_hang": "Gio hang dang trong."})
+
+        dia_chi = attrs.get("dia_chi_giao_hang", "").strip()
+        if attrs["phuong_thuc_nhan"] == "giao_tan_noi" and not dia_chi:
+            raise serializers.ValidationError(
+                {"dia_chi_giao_hang": "Dia chi giao hang la bat buoc khi giao tan noi."}
+            )
+
+        attrs["gio_hang"] = gio_hang
+        attrs["dia_chi_giao_hang"] = dia_chi
+        return attrs
+
+
 class ChiTietDonHangSerializer(serializers.ModelSerializer):
+    ma_sua = serializers.CharField(source="san_pham_id", read_only=True)
     ten_sp = serializers.CharField(source="san_pham.ten_sua", read_only=True)
     hinh_anh = serializers.SerializerMethodField()
     gia_ban = serializers.SerializerMethodField()
+    gia_ban_hien_thi = serializers.SerializerMethodField()
+    ten_lua_chon = serializers.CharField(read_only=True)
 
     class Meta:
         model = ChiTietDonHang
-        fields = ["ten_sp", "so_luong", "gia_ban", "hinh_anh"]
+        fields = [
+            "ma_sua",
+            "ten_sp",
+            "ten_lua_chon",
+            "so_luong",
+            "gia_ban",
+            "gia_ban_hien_thi",
+            "hinh_anh",
+        ]
 
     def get_hinh_anh(self, obj):
         return build_android_media_url(self.context.get("request"), obj.san_pham.hinh)
@@ -544,28 +621,87 @@ class ChiTietDonHangSerializer(serializers.ModelSerializer):
     def get_gia_ban(self, obj):
         return float(obj.gia_ban)
 
+    def get_gia_ban_hien_thi(self, obj):
+        return dinh_dang_tien(obj.gia_ban)
+
 
 class DonHangSerializer(serializers.ModelSerializer):
     san_pham = ChiTietDonHangSerializer(many=True, read_only=True)
     tong_tien = serializers.SerializerMethodField()
+    tong_tien_hien_thi = serializers.SerializerMethodField()
     ngay_dat = serializers.SerializerMethodField()
     trang_thai = serializers.SerializerMethodField()
+    trang_thai_code = serializers.SerializerMethodField()
+    phuong_thuc_nhan_hien_thi = serializers.SerializerMethodField()
+    phuong_thuc_thanh_toan_hien_thi = serializers.SerializerMethodField()
+    tong_san_pham = serializers.SerializerMethodField()
+    hanh_dong_chinh = serializers.SerializerMethodField()
 
     class Meta:
         model = DonHang
-        fields = ["id", "ngay_dat", "trang_thai", "tong_tien", "san_pham"]
+        fields = [
+            "id",
+            "ngay_dat",
+            "trang_thai",
+            "trang_thai_code",
+            "phuong_thuc_nhan",
+            "phuong_thuc_nhan_hien_thi",
+            "ten_nguoi_nhan",
+            "so_dien_thoai",
+            "dia_chi_giao_hang",
+            "phuong_thuc_thanh_toan",
+            "phuong_thuc_thanh_toan_hien_thi",
+            "tong_tien",
+            "tong_tien_hien_thi",
+            "tong_san_pham",
+            "hanh_dong_chinh",
+            "san_pham",
+        ]
 
     def get_tong_tien(self, obj):
         return float(obj.tong_tien)
+
+    def get_tong_tien_hien_thi(self, obj):
+        return dinh_dang_tien(obj.tong_tien)
 
     def get_ngay_dat(self, obj):
         return obj.ngay_dat.strftime("%d/%m/%Y %H:%M")
 
     def get_trang_thai(self, obj):
+        return self._trang_thai_display(obj.trang_thai)
+
+    def get_trang_thai_code(self, obj):
+        return self._trang_thai_code(obj.trang_thai)
+
+    def get_phuong_thuc_nhan_hien_thi(self, obj):
+        return hien_thi_phuong_thuc_nhan(obj.phuong_thuc_nhan)
+
+    def get_phuong_thuc_thanh_toan_hien_thi(self, obj):
+        return hien_thi_phuong_thuc_thanh_toan(obj.phuong_thuc_thanh_toan)
+
+    def get_tong_san_pham(self, obj):
+        return sum(item.so_luong for item in obj.san_pham.all())
+
+    def get_hanh_dong_chinh(self, obj):
+        trang_thai_code = self.get_trang_thai_code(obj)
+        if trang_thai_code == "hoan_thanh":
+            return {"ma": "danh_gia", "nhan": "\u0110\u00e1nh gi\u00e1"}
+        return {"ma": "chi_tiet", "nhan": "Chi ti\u1ebft"}
+
+    def _trang_thai_display(self, trang_thai):
         trang_thai_map = {
             "Dang giao": "\u0110ang giao",
             "Da giao": "Ho\u00e0n th\u00e0nh",
             "Da huy": "\u0110\u00e3 h\u1ee7y",
             "Cho xac nhan": "Ch\u1edd x\u00e1c nh\u1eadn",
         }
-        return trang_thai_map.get(obj.trang_thai, obj.trang_thai)
+        return trang_thai_map.get(trang_thai, trang_thai)
+
+    def _trang_thai_code(self, trang_thai):
+        trang_thai_code_map = {
+            "Dang giao": "dang_giao",
+            "Da giao": "hoan_thanh",
+            "Da huy": "da_huy",
+            "Cho xac nhan": "cho_xac_nhan",
+        }
+        return trang_thai_code_map.get(trang_thai, str(trang_thai).strip().lower().replace(" ", "_"))
