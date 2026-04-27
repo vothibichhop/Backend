@@ -104,7 +104,7 @@ public class CategoryActivity extends AppCompatActivity {
                     if (tvBannerDesc != null) tvBannerDesc.setText(banner.description);
                     if (ivBannerProduct != null && banner.imageUrl != null) {
                         Glide.with(CategoryActivity.this)
-                                .load(banner.imageUrl)
+                                .load(ImageUrlHelper.resolve(banner.imageUrl))
                                 .placeholder(R.drawable.thtruemilk)
                                 .into(ivBannerProduct);
                     }

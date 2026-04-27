@@ -1,11 +1,18 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from .views import BannerQuangCaoViewSet, DanhMucSanPhamViewSet, GioHangViewSet, SuaViewSet
+from .views import (
+    BannerQuangCaoViewSet,
+    DanhMucSanPhamViewSet,
+    DonHangViewSet,
+    GioHangViewSet,
+    SuaViewSet,
+)
 
 router = DefaultRouter(trailing_slash=False)
 router.register("banner-quang-cao", BannerQuangCaoViewSet, basename="banner-quang-cao")
 router.register("danh-muc-san-pham", DanhMucSanPhamViewSet, basename="danh-muc-san-pham")
+router.register("don-hang", DonHangViewSet, basename="don-hang")
 router.register("san-pham-sua", SuaViewSet, basename="san-pham-sua")
 
 urlpatterns = [
@@ -39,6 +46,11 @@ urlpatterns = [
         "gio-hang/<uuid:ma_gio_hang>/xoa-tat-ca",
         GioHangViewSet.as_view({"delete": "xoa_tat_ca"}),
         name="xoa-tat-ca-gio-hang",
+    ),
+    path(
+        "lich-su-don-hang",
+        DonHangViewSet.as_view({"get": "lich_su_don_hang"}),
+        name="lich-su-don-hang",
     ),
     path(
         "chi-tiet-san-pham/<str:ma_sua>",

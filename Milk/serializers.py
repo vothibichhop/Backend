@@ -1,9 +1,12 @@
+from django.conf import settings
 from rest_framework import serializers
 
 from .models import (
     BannerQuangCao,
+    ChiTietDonHang,
     ChiTietGioHang,
     DanhMucSanPham,
+    DonHang,
     GioHang,
     LuaChonMuaSua,
     Sua,
@@ -12,6 +15,21 @@ from .models import (
 
 def dinh_dang_tien(value):
     return f"{int(value):,}".replace(",", ".") + "\u0111"
+
+
+ANDROID_MEDIA_BASE_URL = settings.ANDROID_MEDIA_BASE_URL.rstrip("/")
+
+
+def build_android_media_url(request, image_field):
+    if not image_field:
+        return ""
+
+    relative_url = image_field.url
+    if ANDROID_MEDIA_BASE_URL:
+        return f"{ANDROID_MEDIA_BASE_URL}{relative_url}"
+    if request is not None:
+        return request.build_absolute_uri(relative_url)
+    return relative_url
 
 
 class SuaListQuerySerializer(serializers.Serializer):
@@ -455,3 +473,45 @@ class GioHangSerializer(serializers.ModelSerializer):
 
     def get_tong_tien_hien_thi(self, obj):
         return dinh_dang_tien(self.get_tong_tien(obj))
+
+
+class ChiTietDonHangSerializer(serializers.ModelSerializer):
+    ten_sp = serializers.CharField(source="san_pham.ten_sua", read_only=True)
+    hinh_anh = serializers.SerializerMethodField()
+    gia_ban = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ChiTietDonHang
+        fields = ["ten_sp", "so_luong", "gia_ban", "hinh_anh"]
+
+    def get_hinh_anh(self, obj):
+        return build_android_media_url(self.context.get("request"), obj.san_pham.hinh)
+
+    def get_gia_ban(self, obj):
+        return float(obj.gia_ban)
+
+
+class DonHangSerializer(serializers.ModelSerializer):
+    san_pham = ChiTietDonHangSerializer(many=True, read_only=True)
+    tong_tien = serializers.SerializerMethodField()
+    ngay_dat = serializers.SerializerMethodField()
+    trang_thai = serializers.SerializerMethodField()
+
+    class Meta:
+        model = DonHang
+        fields = ["id", "ngay_dat", "trang_thai", "tong_tien", "san_pham"]
+
+    def get_tong_tien(self, obj):
+        return float(obj.tong_tien)
+
+    def get_ngay_dat(self, obj):
+        return obj.ngay_dat.strftime("%d/%m/%Y %H:%M")
+
+    def get_trang_thai(self, obj):
+        trang_thai_map = {
+            "Dang giao": "\u0110ang giao",
+            "Da giao": "Ho\u00e0n th\u00e0nh",
+            "Da huy": "\u0110\u00e3 h\u1ee7y",
+            "Cho xac nhan": "Ch\u1edd x\u00e1c nh\u1eadn",
+        }
+        return trang_thai_map.get(obj.trang_thai, obj.trang_thai)

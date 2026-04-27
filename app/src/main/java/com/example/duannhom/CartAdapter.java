@@ -50,10 +50,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         CartItem item = list.get(position);
         
-        String imgUrl = item.imageUrl;
-        if (imgUrl != null && !imgUrl.startsWith("http")) {
-            imgUrl = "http://10.0.3.2:8000" + imgUrl;
-        }
+        String imgUrl = ImageUrlHelper.resolve(item.imageUrl);
 
         Glide.with(holder.itemView.getContext())
                 .load(imgUrl)
