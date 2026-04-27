@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+    <!-- Header -->
+    <RelativeLayout
+        android:id="@+id/rlHeaderCategory"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:paddingHorizontal="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:fontFamily="serif"
+            android:text="Sản phẩm"
+            android:textColor="#5C4A9C"
+            android:textSize="20sp"
+           />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_search"
+                app:tint="#5C4A9C" />
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp">
+
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_cart"
+                    app:tint="#FF0000" />
+
+                <TextView
+                    android:id="@+id/tvCartBadgeCategory"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_gravity="top|end"
+                    android:layout_marginTop="-4dp"
+                    android:layout_marginEnd="-4dp"
+                    android:fontFamily="serif"
+                    android:gravity="center"
+                    android:text="3"
+                    android:textColor="#FF0000"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+            </FrameLayout>
+        </LinearLayout>
+    </RelativeLayout>
+
+    <View
+        android:id="@+id/dividerHeader"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/rlHeaderCategory"
+        android:background="#EEEEEE" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/bottomNavCategory"
+        android:layout_below="@id/dividerHeader">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Yellow Banner -->
+            <RelativeLayout
+                android:id="@+id/rlBanner"
+                android:layout_width="match_parent"
+                android:layout_height="160dp"
+                android:layout_margin="12dp"
+                android:background="#FFD54F"
+                android:padding="12dp">
+
+                <TextView
+                    android:id="@+id/tvBannerDesc"
+                    android:layout_width="140dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:fontFamily="serif"
+                    android:lineSpacingExtra="3dp"
+                    android:text="Sữa chua ngũ cốc là sự kết hợp dinh dưỡng giữa sữa chua sánh mịn và ngũ cốc giòn, mang lại vị chua nhẹ, ngọt thơm, giàu protein, canxi và chất xơ"
+                    android:textColor="#D32F2F"
+                    android:textSize="10sp" />
+
+                <ImageView
+                    android:id="@+id/ivLeafBanner"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentBottom="true"
+                    android:src="@drawable/ic_leaf"
+                    app:tint="#4CAF50"
+                    android:padding="1dp"/>
+
+                <TextView
+                    android:id="@+id/tvNewBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
+                    android:background="@drawable/bg_badge_new"
+                    android:fontFamily="serif"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="4dp"
+                    android:rotation="15"
+                    android:text="New"
+                    android:textColor="#000000"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <RelativeLayout
+                    android:id="@+id/containerImage"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="60dp"
+                    android:layout_marginTop="5dp"
+                    android:background="@drawable/bg_option_selected"
+                    android:padding="0dp">
+
+                    <ImageView
+                        android:id="@+id/ivBannerProduct"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/ngu_coc" />
+                </RelativeLayout>
+                <TextView
+                    android:id="@+id/tvBannerProductName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/containerImage"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="10dp"
+                    android:fontFamily="serif"
+                    android:gravity="center"
+                    android:text="Sữa chua ăn mix mật ong ngũ cốc"
+                    android:textColor="#2196F3"
+                    android:textSize="16sp"
+                    />
+
+                <ImageView
+                    android:id="@+id/ivNextPage"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentBottom="true"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:src="@drawable/ic_arrow_forward"
+                    app:tint="#000000" />
+            </RelativeLayout>
+
+            <!-- RecyclerView: Hiển thị danh sách các danh mục -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvCategories"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:paddingBottom="20dp"
+                android:fontFamily="serif"/>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavCategory"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:layout_alignParentBottom="true"
+        android:background="#FFFFFF"
+        app:elevation="8dp"
+        app:itemIconTint="@null"
+        app:itemTextColor="#2196F3"
+        app:labelVisibilityMode="labeled"
+        app:menu="@menu/menu_bottom" />
+
+</RelativeLayout>

@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+    <!-- Header Section -->
+    <LinearLayout
+        android:id="@+id/llHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Banner Blue Area -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="125dp"
+            android:background="#2196F3"
+            android:orientation="horizontal"
+            android:padding="8dp"
+            android:gravity="center_vertical">
+
+            <!-- Left column: Logo top, Leaf bottom -->
+            <LinearLayout
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+
+                <ImageView
+                    android:id="@+id/imgLogo"
+                    android:layout_width="75dp"
+                    android:layout_height="45dp"
+                    android:background="#FFFFFF"
+                    android:padding="4dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/logo" />
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <ImageView
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:src="@drawable/ic_leaf"
+                    app:tint="#8BC34A" />
+            </LinearLayout>
+
+            <!-- Right area: Slogan fully centered -->
+            <TextView
+                android:id="@+id/tvSlogan"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:paddingEnd="20dp"
+                android:text="Tinh tuý từ thiên nhiên - nuôi dưỡng mỗi ngày"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:textStyle="italic" />
+
+        </LinearLayout>
+
+        <!-- Search and Cart Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="10dp">
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="45dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_search_box">
+
+                <EditText
+                    android:id="@+id/etSearchMain"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/transparent"
+                    android:hint="Bạn muốn tìm sản phẩm gì?"
+                    android:paddingStart="15dp"
+                    android:paddingEnd="45dp"
+                    android:textColor="#2196F3"
+                    android:textColorHint="#9E9E9E"
+                    android:textSize="14sp"
+                    android:focusable="false"
+                    android:clickable="true" />
+
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="12dp"
+                    android:src="@android:drawable/ic_menu_search"
+                    app:tint="#2196F3" />
+            </RelativeLayout>
+
+            <FrameLayout
+                android:id="@+id/flCartMain"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp">
+
+                <ImageView
+                    android:id="@+id/imgCartMain"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_cart"
+                    app:tint="#FF0000" />
+
+                <TextView
+                    android:id="@+id/tvCartBadge"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_gravity="top|end"
+                    android:layout_marginTop="-4dp"
+                    android:layout_marginEnd="-4dp"
+                    android:background="@android:color/transparent"
+                    android:gravity="center"
+                    android:text="3"
+                    android:textColor="#FF0000"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </FrameLayout>
+        </LinearLayout>
+
+        <!-- Success Message Bar (Green style from image) -->
+        <TextView
+            android:id="@+id/tvSuccessMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#A5D6A7"
+            android:gravity="center"
+            android:padding="8dp"
+            android:text="Thêm vào giỏ thành công"
+            android:textColor="#388E3C"
+            android:textSize="16sp"
+            android:textStyle="normal"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <!-- Product Grid -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvProduct"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/bottomNav"
+        android:layout_below="@id/llHeader"
+        android:clipToPadding="false"
+        android:padding="4dp" />
+
+    <!-- Bottom Navigation -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNav"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:layout_alignParentBottom="true"
+        android:background="#FFFFFF"
+        app:elevation="8dp"
+        app:itemIconTint="@null"
+        app:itemTextColor="@color/nav_item_color"
+        app:labelVisibilityMode="labeled"
+        app:menu="@menu/menu_bottom" />
+
+</RelativeLayout>
