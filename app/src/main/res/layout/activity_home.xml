@@ -36,7 +36,7 @@
         <ImageView
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:src="@android:drawable/ic_menu_gallery"
+            android:src="@drawable/ic_leaf"
             android:layout_gravity="start"
             app:tint="#8BC34A"/>
     </LinearLayout>

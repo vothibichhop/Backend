@@ -1,5 +1,6 @@
 package com.example.duannhom;
 
+import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,15 +28,23 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Category category = list.get(position);
+
+        // Hiển thị dữ liệu (Sử dụng trực tiếp field name và count)
         holder.tvName.setText(category.name);
         holder.tvCount.setText(String.valueOf(category.count));
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(v.getContext(), CategoryDetailActivity.class);
-                v.getContext().startActivity(intent);
-            }
+        // Xử lý click để chuyển sang màn hình chi tiết
+        holder.itemView.setOnClickListener(v -> {
+            // Lấy context trực tiếp từ view click
+            Context context = v.getContext();
+
+            Intent intent = new Intent(context, CategoryDetailActivity.class);
+
+            // Gửi mã danh mục sang màn hình sau
+            // Lưu ý: Dùng field ma_danh_muc (vì class Category của bạn đang dùng public field)
+            intent.putExtra("MA_DANH_MUC", category.ma_danh_muc);
+
+            context.startActivity(intent);
         });
     }
 

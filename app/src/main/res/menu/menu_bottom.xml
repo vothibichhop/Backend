@@ -2,18 +2,18 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/menu_home"
-        android:icon="@android:drawable/ic_menu_view"
+        android:icon="@drawable/ic_home"
         android:title="Trang chủ" />
     <item
         android:id="@+id/menu_category"
-        android:icon="@android:drawable/ic_menu_sort_by_size"
+        android:icon="@drawable/ic_category"
         android:title="Danh mục" />
     <item
         android:id="@+id/menu_orders"
-        android:icon="@android:drawable/ic_menu_agenda"
+        android:icon="@drawable/ic_order"
         android:title="Đơn hàng" />
     <item
         android:id="@+id/menu_account"
-        android:icon="@android:drawable/ic_menu_myplaces"
+        android:icon="@drawable/ic_account"
         android:title="Tài khoản" />
 </menu>

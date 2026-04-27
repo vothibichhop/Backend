@@ -1,28 +1,42 @@
 package com.example.duannhom;
 
 import android.app.AlertDialog;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
 import java.text.DecimalFormat;
 import java.util.List;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
 
     private List<CartItem> list;
     private OnCartChangeListener listener;
+    private Context context;
+    private String cartId;
 
     public interface OnCartChangeListener {
         void onTotalChanged(long totalPrice);
     }
 
-    public CartAdapter(List<CartItem> list, OnCartChangeListener listener) {
+    public CartAdapter(Context context, List<CartItem> list, OnCartChangeListener listener) {
+        this.context = context;
         this.list = list;
         this.listener = listener;
+        
+        // Lấy cart_id thật từ SharedPreferences
+        SharedPreferences prefs = context.getSharedPreferences("CartPrefs", Context.MODE_PRIVATE);
+        this.cartId = prefs.getString("cart_id", null);
     }
 
     @NonNull
@@ -35,7 +49,17 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         CartItem item = list.get(position);
-        holder.ivProduct.setImageResource(item.imageRes);
+        
+        String imgUrl = item.imageUrl;
+        if (imgUrl != null && !imgUrl.startsWith("http")) {
+            imgUrl = "http://10.0.3.2:8000" + imgUrl;
+        }
+
+        Glide.with(holder.itemView.getContext())
+                .load(imgUrl)
+                .placeholder(R.drawable.thtruemilk)
+                .into(holder.ivProduct);
+
         holder.tvName.setText(item.name);
         holder.tvInfo.setText(item.info);
         
@@ -44,18 +68,45 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
         holder.tvQuantity.setText(String.valueOf(item.quantity));
 
         holder.btnPlus.setOnClickListener(v -> {
+            int oldQty = item.quantity;
             item.quantity++;
             notifyItemChanged(position);
             updateTotal();
+            syncQuantityWithServer(item, oldQty, position);
         });
 
         holder.btnMinus.setOnClickListener(v -> {
             if (item.quantity > 1) {
+                int oldQty = item.quantity;
                 item.quantity--;
                 notifyItemChanged(position);
                 updateTotal();
+                syncQuantityWithServer(item, oldQty, position);
             } else {
                 showRemoveDialog(holder.itemView, position);
+            }
+        });
+    }
+
+    private void syncQuantityWithServer(CartItem item, int oldQty, int position) {
+        if (cartId == null) return;
+        
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+        apiService.updateCartItemQuantity(cartId, item.productId, item).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (!response.isSuccessful()) {
+                    item.quantity = oldQty;
+                    notifyItemChanged(position);
+                    updateTotal();
+                    Toast.makeText(context, "Lỗi cập nhật server", Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                item.quantity = oldQty;
+                notifyItemChanged(position);
+                updateTotal();
             }
         });
     }
@@ -68,17 +119,29 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
 
         dialogView.findViewById(R.id.btnCancel).setOnClickListener(v -> dialog.dismiss());
         dialogView.findViewById(R.id.btnConfirm).setOnClickListener(v -> {
-            list.remove(position);
-            notifyItemRemoved(position);
-            notifyItemRangeChanged(position, list.size());
-            updateTotal();
+            if (cartId != null) {
+                CartItem itemToRemove = list.get(position);
+                ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+                apiService.deleteCartItem(cartId, itemToRemove.productId).enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        if (response.isSuccessful()) {
+                            list.remove(position);
+                            notifyItemRemoved(position);
+                            notifyItemRangeChanged(position, list.size());
+                            updateTotal();
+                        }
+                    }
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        Toast.makeText(view.getContext(), "Không thể xóa sản phẩm", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
             dialog.dismiss();
         });
 
         dialog.show();
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-        }
     }
 
     private void updateTotal() {

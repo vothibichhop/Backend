@@ -18,57 +18,46 @@
             android:layout_height="24dp"
             android:layout_centerVertical="true"
             android:src="@android:drawable/ic_menu_revert"
-            app:tint="#5C4A9C" />
+            app:tint="#333333" />
 
         <TextView
+            android:id="@+id/tvToolbarTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginStart="16dp"
             android:layout_toEndOf="@id/btnBack"
-            android:text="TH True Milk"
+            android:text="Chi tiết sản phẩm"
             android:textColor="#5C4A9C"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
-        <LinearLayout
+        <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:layout_centerVertical="true">
 
             <ImageView
-                android:id="@+id/ivSearchDetail"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_search"
-                android:clickable="true"
-                android:focusable="true"
-                app:tint="#5C4A9C" />
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@drawable/ic_cart"
+                app:tint="#FF4C4C" />
 
-            <FrameLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp">
-
-                <ImageView
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
-                    android:src="@drawable/ic_cart" />
-
-                <TextView
-                    android:layout_width="14dp"
-                    android:layout_height="14dp"
-                    android:layout_gravity="top|end"
-                    android:background="@android:color/transparent"
-                    android:gravity="center"
-                    android:text="3"
-                    android:textColor="#FF0000"
-                    android:textSize="10sp"
-                    android:textStyle="bold" />
-            </FrameLayout>
-        </LinearLayout>
+            <TextView
+                android:id="@+id/tvCartCount"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_gravity="top|end"
+                android:layout_marginTop="-4dp"
+                android:layout_marginEnd="-4dp"
+                android:background="@android:color/transparent"
+                android:gravity="center"
+                android:text="3"
+                android:textColor="#FF4C4C"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </FrameLayout>
     </RelativeLayout>
 
     <View
@@ -76,7 +65,7 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_below="@id/topBar"
-        android:background="#EEEEEE" />
+        android:background="#DDDDDD" />
 
     <!-- Content -->
     <ScrollView
@@ -92,39 +81,54 @@
             android:padding="16dp">
 
             <ImageView
+                android:id="@+id/ivProductDetail"
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
+                android:layout_height="320dp"
                 android:scaleType="centerInside"
-                android:src="@drawable/th" />
+                android:src="@drawable/thtruemilk" />
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginVertical="16dp"
+                android:layout_height="1.5dp"
+                android:layout_marginVertical="12dp"
                 android:background="#5C4A9C" />
 
             <TextView
+                android:id="@+id/tvSpecificationDetail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Sữa tươi nguyên chất"
-                android:textColor="#AAAAAA"
+                android:text="Quy cách"
+                android:textColor="#999999"
                 android:textSize="14sp" />
 
             <TextView
+                android:id="@+id/tvProductNameDetail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="TH True Milk"
+                android:text="Tên sản phẩm"
                 android:textColor="#5C4A9C"
-                android:textSize="22sp"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <!-- Price for Java code -->
+            <TextView
+                android:id="@+id/tvProductPriceDetail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="0đ"
+                android:textColor="#FF4C4C"
+                android:textSize="18sp"
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/tvDescriptionDetail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="12dp"
                 android:lineSpacingExtra="4dp"
-                android:text="Được sản xuất từ sữa tươi sạch, kết hợp với các dưỡng chất thiết yếu như đạm, chất béo, carbohydrate, DHA, Omega 3-6, canxi, vitamin và khoáng chất. Ngoài ra, sản phẩm còn bổ sung GOS/FOS và HMO giúp hỗ trợ tiêu hóa, tăng cường miễn dịch, góp phần giúp trẻ phát triển toàn diện về thể chất và trí tuệ."
+                android:text="Mô tả chi tiết sản phẩm..."
                 android:textColor="#333333"
                 android:textSize="14sp" />
 
@@ -132,76 +136,92 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginVertical="16dp"
-                android:background="#5C4A9C" />
+                android:background="#DDDDDD" />
 
-            <!-- Options -->
+            <!-- Option 1 -->
             <LinearLayout
+                android:id="@+id/option1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_option_selected"
+                android:background="@drawable/bg_button_outline"
                 android:gravity="center_vertical"
                 android:padding="12dp">
 
-                <View
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:background="@android:drawable/radiobutton_on_background" />
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:buttonTint="#5C4A9C"
+                    android:clickable="false" />
 
                 <TextView
+                    android:id="@+id/tvOption1Name"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginStart="8dp"
                     android:layout_weight="1"
                     android:text="Thùng 48 hộp"
-                    android:textColor="#5C4A9C" />
+                    android:textColor="#5C4A9C"
+                    android:textSize="16sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="-8%"
-                    android:textColor="#FF0000"
+                    android:textColor="#FF4C4C"
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tvOption1Price"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginStart="12dp"
                     android:text="400.000đ"
-                    android:textColor="#5C4A9C" />
+                    android:textColor="#5C4A9C"
+                    android:textSize="16sp" />
             </LinearLayout>
 
+            <!-- Option 2 with FIXED ID -->
             <LinearLayout
+                android:id="@+id/option2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:background="@drawable/bg_option_unselected"
+                android:background="@drawable/bg_button_outline"
                 android:gravity="center_vertical"
-                android:padding="12dp">
+                android:padding="12dp"
+                android:alpha="0.6">
 
-                <View
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:background="@android:drawable/radiobutton_off_background" />
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="false"
+                    android:buttonTint="#999999"
+                    android:clickable="false" />
 
                 <TextView
+                    android:id="@+id/tvOption2Name"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginStart="8dp"
                     android:layout_weight="1"
                     android:text="Lốc 4 hộp"
-                    android:textColor="#5C4A9C" />
+                    android:textColor="#5C4A9C"
+                    android:textSize="16sp" />
 
                 <TextView
+                    android:id="@+id/tvOption2Price"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="41.400đ"
-                    android:textColor="#5C4A9C" />
+                    android:textColor="#5C4A9C"
+                    android:textSize="16sp" />
             </LinearLayout>
 
         </LinearLayout>
     </ScrollView>
 
-    <!-- Bottom Bar -->
+    <!-- Bottom Action Bar -->
     <LinearLayout
         android:id="@+id/bottomBar"
         android:layout_width="match_parent"
@@ -209,42 +229,44 @@
         android:layout_alignParentBottom="true"
         android:background="#FFFFFF"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:gravity="center_vertical">
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:background="@drawable/bg_quantity_picker"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_button_outline"
             android:gravity="center"
             android:orientation="horizontal"
-            android:paddingHorizontal="8dp">
+            android:paddingHorizontal="4dp">
 
             <TextView
                 android:id="@+id/btnMinus"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="8dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:gravity="center"
                 android:text="-"
-                android:textColor="#5C4A9C"
-                android:textSize="20sp" />
+                android:textColor="#007BFF"
+                android:textSize="22sp" />
 
             <TextView
                 android:id="@+id/tvQuantity"
-                android:layout_width="wrap_content"
+                android:layout_width="36dp"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="12dp"
+                android:gravity="center"
                 android:text="1"
                 android:textColor="#333333"
-                android:textSize="18sp" />
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/btnPlus"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="8dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:gravity="center"
                 android:text="+"
-                android:textColor="#5C4A9C"
-                android:textSize="20sp" />
+                android:textColor="#007BFF"
+                android:textSize="22sp" />
         </LinearLayout>
 
         <Button
@@ -253,9 +275,12 @@
             android:layout_height="48dp"
             android:layout_marginStart="16dp"
             android:backgroundTint="#007BFF"
-            android:text="400.000đ | Thêm vào giỏ"
+            android:text="0đ | Thêm vào giỏ"
             android:textAllCaps="false"
-            android:textColor="#FFFFFF" />
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:cornerRadius="4dp" />
     </LinearLayout>
 
 </RelativeLayout>

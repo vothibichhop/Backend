@@ -7,15 +7,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
+import com.bumptech.glide.Glide;
 import java.util.List;
 
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHolder> {
-
-    List<Product> list;
+    private List<Product> list;
 
     public ProductAdapter(List<Product> list) {
         this.list = list;
@@ -24,56 +22,62 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_product, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_product, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Product p = list.get(position);
-        holder.imgProduct.setImageResource(p.imageRes);
-        holder.tvName.setText(p.name);
-        holder.tvInfo.setText(p.info);
-        holder.tvPrice.setText(p.price);
-        holder.tvDiscount.setText(p.discount);
+        Product product = list.get(position);
 
-        // Gắn sự kiện click vào Nút "Chọn sản phẩm"
-        holder.btnSelect.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(v.getContext(), ProductDetailActivity.class);
-                v.getContext().startActivity(intent);
-            }
-        });
+        holder.tvName.setText(product.name);
+        holder.tvPrice.setText((product.price != null ? product.price : "0") + "đ");
+        holder.tvDiscount.setText("-" + (product.discount != null ? product.discount : "0") + "%");
 
-        // Bạn cũng có thể giữ lại click vào toàn bộ ô nếu muốn
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(v.getContext(), ProductDetailActivity.class);
-                v.getContext().startActivity(intent);
-            }
-        });
+        // Cập nhật thông tin quy cách động từ API thay vì để cứng "180 ml, Thùng 48 hộp"
+        if (holder.tvInfo != null) {
+            holder.tvInfo.setText(product.specification != null ? product.specification : "");
+        }
+
+        String imgUrl = product.imageUrl;
+        if (imgUrl != null && !imgUrl.startsWith("http")) {
+            imgUrl = "http://10.0.3.2:8000" + imgUrl; 
+        }
+
+        Glide.with(holder.itemView.getContext())
+                .load(imgUrl)
+                .placeholder(R.drawable.ngu_coc)
+                .into(holder.imgProduct);
+
+        View.OnClickListener clickListener = v -> {
+            Intent intent = new Intent(v.getContext(), ProductDetailActivity.class);
+            intent.putExtra("PRODUCT_ID", product.id);
+            v.getContext().startActivity(intent);
+        };
+
+        holder.itemView.setOnClickListener(clickListener);
+        if (holder.btnSelect != null) {
+            holder.btnSelect.setOnClickListener(clickListener);
+        }
     }
 
     @Override
     public int getItemCount() {
-        return list.size();
+        return list != null ? list.size() : 0;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView imgProduct;
-        TextView tvName, tvInfo, tvPrice, tvDiscount;
+        TextView tvName, tvPrice, tvDiscount, tvInfo;
         Button btnSelect;
-
+        
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             imgProduct = itemView.findViewById(R.id.imgProduct);
             tvName = itemView.findViewById(R.id.tvName);
-            tvInfo = itemView.findViewById(R.id.tvInfo);
             tvPrice = itemView.findViewById(R.id.tvPrice);
             tvDiscount = itemView.findViewById(R.id.tvDiscount);
+            tvInfo = itemView.findViewById(R.id.tvInfo); // Ánh xạ TextView quy cách
             btnSelect = itemView.findViewById(R.id.btnSelect);
         }
     }

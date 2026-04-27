@@ -31,7 +31,8 @@
             android:layout_toEndOf="@id/btnBack"
             android:text="Sữa bột trẻ em"
             android:textColor="#FFFFFF"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:fontFamily="serif"/> <!-- Đã sửa Serif thành serif -->
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -48,7 +49,7 @@
                 android:src="@drawable/ic_search"
                 android:clickable="true"
                 android:focusable="true"
-                app:tint="#FFFFFF" />
+                app:tint="#ADD8E6" />
 
             <FrameLayout
                 android:layout_width="wrap_content"
@@ -58,7 +59,8 @@
                 <ImageView
                     android:layout_width="28dp"
                     android:layout_height="28dp"
-                    android:src="@drawable/ic_cart" />
+                    android:src="@drawable/ic_cart"
+                    app:tint="#FFFFFF" />
 
                 <TextView
                     android:layout_width="14dp"
@@ -68,7 +70,8 @@
                     android:text="3"
                     android:textColor="#FF0000"
                     android:textSize="10sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:fontFamily="serif" />
             </FrameLayout>
         </LinearLayout>
     </RelativeLayout>
@@ -84,13 +87,16 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- ĐÃ THÊM ID tvDescription ĐỂ FIX LỖI JAVA -->
             <TextView
+                android:id="@+id/tvDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:lineSpacingExtra="4dp"
-                android:text="Sữa bột trẻ em là sản phẩm dinh dưỡng được nghiên cứu dành riêng cho từng giai đoạn phát triển của trẻ nhỏ, nhằm bổ sung các dưỡng chất thiết yếu như protein, vitamin, khoáng chất, DHA, canxi... hỗ trợ sự phát triển toàn diện về thể chất, trí tuệ và hệ miễn dịch."
+                android:text="Dữ liệu đang tải..."
                 android:textColor="#333333"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                android:fontFamily="serif" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvCategoryProducts"
