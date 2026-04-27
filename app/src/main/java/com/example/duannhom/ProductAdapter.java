@@ -39,10 +39,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
             holder.tvInfo.setText(product.specification != null ? product.specification : "");
         }
 
-        String imgUrl = product.imageUrl;
-        if (imgUrl != null && !imgUrl.startsWith("http")) {
-            imgUrl = "http://10.0.3.2:8000" + imgUrl; 
-        }
+        String imgUrl = ImageUrlHelper.resolve(product.imageUrl);
 
         Glide.with(holder.itemView.getContext())
                 .load(imgUrl)

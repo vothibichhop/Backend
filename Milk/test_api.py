@@ -290,3 +290,29 @@ class GioHangApiTests(APITestCase):
         self.assertEqual(xoa_tat_ca.data["tong_mat_hang"], 0)
         self.assertEqual(xoa_tat_ca.data["tong_so_luong"], 0)
         self.assertEqual(xoa_tat_ca.data["tong_tien_hien_thi"], "0\u0111")
+
+
+class DonHangApiTests(APITestCase):
+    def test_order_history_returns_nested_products_for_android(self):
+        response = self.client.get("/api/lich-su-don-hang")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 3)
+        self.assertEqual(response.data[0]["id"], "DH001")
+        self.assertEqual(response.data[0]["ngay_dat"], "04/02/2026 14:30")
+        self.assertEqual(response.data[0]["trang_thai"], "\u0110ang giao")
+        self.assertEqual(response.data[0]["tong_tien"], 199000.0)
+        self.assertEqual(len(response.data[0]["san_pham"]), 2)
+        self.assertIn("ten_sp", response.data[0]["san_pham"][0])
+        self.assertEqual(
+            response.data[0]["san_pham"][0]["hinh_anh"],
+            "http://10.0.2.2:8000/media/suas/SUABOT1.jpg",
+        )
+        self.assertEqual(response.data[1]["id"], "DH002")
+        self.assertEqual(response.data[1]["trang_thai"], "Ho\u00e0n th\u00e0nh")
+        self.assertEqual(response.data[1]["tong_tien"], 356000.0)
+        self.assertEqual(len(response.data[1]["san_pham"]), 1)
+        self.assertEqual(response.data[2]["id"], "DH003")
+        self.assertEqual(response.data[2]["trang_thai"], "\u0110\u00e3 h\u1ee7y")
+        self.assertEqual(response.data[2]["tong_tien"], 490000.0)
+        self.assertEqual(len(response.data[2]["san_pham"]), 1)

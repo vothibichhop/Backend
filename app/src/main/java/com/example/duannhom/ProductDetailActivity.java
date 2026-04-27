@@ -173,10 +173,7 @@ public class ProductDetailActivity extends AppCompatActivity {
             tvProductPrice.setText(formatter.format(currentPriceValue).replace(",", ".") + "\u0111");
         }
 
-        String imgUrl = product.imageUrl;
-        if (imgUrl != null && !imgUrl.startsWith("http")) {
-            imgUrl = "http://10.0.3.2:8000" + imgUrl;
-        }
+        String imgUrl = ImageUrlHelper.resolve(product.imageUrl);
 
         if (ivProduct != null) {
             Glide.with(this).load(imgUrl).placeholder(R.drawable.thtruemilk).into(ivProduct);

@@ -8,15 +8,16 @@ from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .models import BannerQuangCao, ChiTietGioHang, DanhMucSanPham, GioHang, Sua
+from .models import BannerQuangCao, ChiTietGioHang, DanhMucSanPham, DonHang, GioHang, Sua
 from .serializers import (
     BannerQuangCaoSerializer,
     CapNhatChiTietGioHangSerializer,
-    ChiTietSuaSerializer,
     ChiTietDanhMucSanPhamSerializer,
+    ChiTietSuaSerializer,
     DanhMucGoiYSerializer,
     DanhMucSanPhamSearchQuerySerializer,
     DanhMucSanPhamSerializer,
+    DonHangSerializer,
     GioHangSerializer,
     SuaListQuerySerializer,
     SuaListSerializer,
@@ -257,3 +258,19 @@ class GioHangViewSet(viewsets.ViewSet):
         gio_hang.chi_tiet.all().delete()
         self._touch_gio_hang(gio_hang)
         return self._serialize_gio_hang(gio_hang, request)
+
+
+class DonHangViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    serializer_class = DonHangSerializer
+
+    def get_queryset(self):
+        return DonHang.objects.prefetch_related("san_pham__san_pham").order_by("-ngay_dat", "id")
+
+    @action(detail=False, methods=["get"], url_path="lich-su-don-hang")
+    def lich_su_don_hang(self, request):
+        serializer = self.get_serializer(
+            self.get_queryset(),
+            many=True,
+            context={"request": request},
+        )
+        return Response(serializer.data)

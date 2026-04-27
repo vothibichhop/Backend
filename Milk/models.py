@@ -193,3 +193,41 @@ class ChiTietGioHang(models.Model):
 
     def __str__(self):
         return f"{self.gio_hang_id} - {self.sua_id} x {self.so_luong}"
+
+
+class DonHang(models.Model):
+    id = models.CharField(max_length=20, primary_key=True)
+    ngay_dat = models.DateTimeField()
+    trang_thai = models.CharField(max_length=50)
+    tong_tien = models.DecimalField(max_digits=12, decimal_places=1)
+
+    class Meta:
+        ordering = ["-ngay_dat", "id"]
+        verbose_name = "Don hang"
+        verbose_name_plural = "Don hang"
+
+    def __str__(self):
+        return self.id
+
+
+class ChiTietDonHang(models.Model):
+    don_hang = models.ForeignKey(
+        DonHang,
+        on_delete=models.CASCADE,
+        related_name="san_pham",
+    )
+    san_pham = models.ForeignKey(
+        Sua,
+        on_delete=models.PROTECT,
+        related_name="chi_tiet_don_hang",
+    )
+    so_luong = models.PositiveIntegerField(default=1)
+    gia_ban = models.DecimalField(max_digits=12, decimal_places=1)
+
+    class Meta:
+        ordering = ["id"]
+        verbose_name = "Chi tiet don hang"
+        verbose_name_plural = "Chi tiet don hang"
+
+    def __str__(self):
+        return f"{self.don_hang_id} - {self.san_pham_id} x {self.so_luong}"
