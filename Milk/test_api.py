@@ -113,6 +113,40 @@ class DanhMucSanPhamApiTests(APITestCase):
         self.assertEqual(len(response.data["san_pham"]), 1)
         self.assertEqual(response.data["san_pham"][0]["ma_danh_muc"], "DM01")
 
+    def test_search_categories_for_search_screen(self):
+        response = self.client.get("/api/tim-kiem-loai-sua")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 7)
+        self.assertEqual(response.data[0]["ma_danh_muc"], "DM01")
+        self.assertEqual(response.data[0]["ten_danh_muc"], "S\u1eefa b\u1ed9t tr\u1ebb em")
+
+    def test_search_categories_matches_keyword_without_diacritics(self):
+        response = self.client.get("/api/tim-kiem-loai-sua", {"q": "sua"})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 6)
+        self.assertEqual(response.data[0]["ma_danh_muc"], "DM01")
+        self.assertNotIn("DM02", [item["ma_danh_muc"] for item in response.data])
+
+    def test_search_categories_filters_by_keyword(self):
+        response = self.client.get("/api/tim-kiem-loai-sua", {"q": "thuc vat"})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["ma_danh_muc"], "DM07")
+        self.assertEqual(response.data[0]["ten_danh_muc"], "S\u1eefa th\u1ef1c v\u1eadt")
+
+    def test_recommended_categories_with_image_for_search_screen(self):
+        response = self.client.get("/api/danh-cho-ban")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 3)
+        self.assertEqual(response.data[0]["ma_danh_muc"], "DM01")
+        self.assertEqual(response.data[0]["tieu_de_hien_thi"], "S\u1eefa b\u1ed9t tr\u1ebb em")
+        self.assertTrue(response.data[0]["hinh_dai_dien"].startswith("http://testserver/media/suas/"))
+        self.assertIsNotNone(response.data[0]["ma_sua_dai_dien"])
+
 
 class BannerQuangCaoApiTests(APITestCase):
     def test_list_banner(self):

@@ -9,21 +9,25 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.Glide;
+
 import java.text.DecimalFormat;
 import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
 
-    private List<CartItem> list;
-    private OnCartChangeListener listener;
-    private Context context;
-    private String cartId;
+    private final List<CartItem> list;
+    private final OnCartChangeListener listener;
+    private final Context context;
+    private final String cartId;
 
     public interface OnCartChangeListener {
         void onTotalChanged(long totalPrice);
@@ -33,8 +37,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
         this.context = context;
         this.list = list;
         this.listener = listener;
-        
-        // Lấy cart_id thật từ SharedPreferences
+
         SharedPreferences prefs = context.getSharedPreferences("CartPrefs", Context.MODE_PRIVATE);
         this.cartId = prefs.getString("cart_id", null);
     }
@@ -49,7 +52,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         CartItem item = list.get(position);
-        
+
         String imgUrl = item.imageUrl;
         if (imgUrl != null && !imgUrl.startsWith("http")) {
             imgUrl = "http://10.0.3.2:8000" + imgUrl;
@@ -61,10 +64,10 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
                 .into(holder.ivProduct);
 
         holder.tvName.setText(item.name);
-        holder.tvInfo.setText(item.info);
-        
+        holder.tvInfo.setText(item.info != null ? item.info : "");
+
         DecimalFormat formatter = new DecimalFormat("#,###");
-        holder.tvPrice.setText(formatter.format(item.price).replace(",", ".") + "đ");
+        holder.tvPrice.setText(formatter.format(item.price).replace(",", ".") + "\u0111");
         holder.tvQuantity.setText(String.valueOf(item.quantity));
 
         holder.btnPlus.setOnClickListener(v -> {
@@ -89,21 +92,27 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
     }
 
     private void syncQuantityWithServer(CartItem item, int oldQty, int position) {
-        if (cartId == null) return;
-        
+        if (cartId == null) {
+            return;
+        }
+
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
-        apiService.updateCartItemQuantity(cartId, item.productId, item).enqueue(new Callback<Void>() {
+        UpdateCartItemRequest request = new UpdateCartItemRequest(item.quantity, item.optionId);
+        apiService.updateCartItemQuantity(cartId, item.id, request).enqueue(new Callback<CartResponse>() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                if (!response.isSuccessful()) {
+            public void onResponse(Call<CartResponse> call, Response<CartResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    applyCartResponse(response.body());
+                } else {
                     item.quantity = oldQty;
                     notifyItemChanged(position);
                     updateTotal();
-                    Toast.makeText(context, "Lỗi cập nhật server", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Loi cap nhat server", Toast.LENGTH_SHORT).show();
                 }
             }
+
             @Override
-            public void onFailure(Call<Void> call, Throwable t) {
+            public void onFailure(Call<CartResponse> call, Throwable t) {
                 item.quantity = oldQty;
                 notifyItemChanged(position);
                 updateTotal();
@@ -122,19 +131,17 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
             if (cartId != null) {
                 CartItem itemToRemove = list.get(position);
                 ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
-                apiService.deleteCartItem(cartId, itemToRemove.productId).enqueue(new Callback<Void>() {
+                apiService.deleteCartItem(cartId, itemToRemove.id).enqueue(new Callback<CartResponse>() {
                     @Override
-                    public void onResponse(Call<Void> call, Response<Void> response) {
-                        if (response.isSuccessful()) {
-                            list.remove(position);
-                            notifyItemRemoved(position);
-                            notifyItemRangeChanged(position, list.size());
-                            updateTotal();
+                    public void onResponse(Call<CartResponse> call, Response<CartResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            applyCartResponse(response.body());
                         }
                     }
+
                     @Override
-                    public void onFailure(Call<Void> call, Throwable t) {
-                        Toast.makeText(view.getContext(), "Không thể xóa sản phẩm", Toast.LENGTH_SHORT).show();
+                    public void onFailure(Call<CartResponse> call, Throwable t) {
+                        Toast.makeText(view.getContext(), "Khong the xoa san pham", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -154,6 +161,16 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
         }
     }
 
+    private void applyCartResponse(CartResponse response) {
+        list.clear();
+        if (response.items != null) {
+            list.addAll(response.items);
+        }
+        CartManager.getInstance().syncCart(response);
+        notifyDataSetChanged();
+        updateTotal();
+    }
+
     @Override
     public int getItemCount() {
         return list.size();
@@ -161,7 +178,12 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView ivProduct;
-        TextView tvName, tvInfo, tvPrice, tvQuantity, btnPlus, btnMinus;
+        TextView tvName;
+        TextView tvInfo;
+        TextView tvPrice;
+        TextView tvQuantity;
+        TextView btnPlus;
+        TextView btnMinus;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);

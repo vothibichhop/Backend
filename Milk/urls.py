@@ -66,6 +66,16 @@ urlpatterns = [
         name="danh-muc",
     ),
     path(
+        "tim-kiem-loai-sua",
+        DanhMucSanPhamViewSet.as_view({"get": "tim_kiem_loai_sua"}),
+        name="tim-kiem-loai-sua",
+    ),
+    path(
+        "danh-cho-ban",
+        DanhMucSanPhamViewSet.as_view({"get": "danh_cho_ban"}),
+        name="danh-cho-ban",
+    ),
+    path(
         "danh-sach-san-pham",
         SuaViewSet.as_view({"get": "danh_sach_san_pham"}),
         name="danh-sach-san-pham",

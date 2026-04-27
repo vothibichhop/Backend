@@ -5,7 +5,7 @@ import java.util.List;
 
 public class CartManager {
     private static CartManager instance;
-    private List<CartItem> cartItems;
+    private final List<CartItem> cartItems;
 
     private CartManager() {
         cartItems = new ArrayList<>();
@@ -19,7 +19,6 @@ public class CartManager {
     }
 
     public void addToCart(CartItem item) {
-        // Kiểm tra xem sản phẩm đã có trong giỏ chưa
         for (CartItem existingItem : cartItems) {
             if (existingItem.productId != null && existingItem.productId.equals(item.productId)) {
                 existingItem.quantity += item.quantity;
@@ -27,6 +26,25 @@ public class CartManager {
             }
         }
         cartItems.add(item);
+    }
+
+    public void replaceCartItems(List<CartItem> items) {
+        cartItems.clear();
+        if (items != null) {
+            cartItems.addAll(items);
+        }
+    }
+
+    public void syncCart(CartResponse response) {
+        if (response == null) {
+            cartItems.clear();
+            return;
+        }
+        replaceCartItems(response.items);
+    }
+
+    public void clear() {
+        cartItems.clear();
     }
 
     public int getCartCount() {

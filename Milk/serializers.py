@@ -21,6 +21,10 @@ class SuaListQuerySerializer(serializers.Serializer):
     danh_muc = serializers.CharField(required=False, allow_blank=True)
 
 
+class DanhMucSanPhamSearchQuerySerializer(serializers.Serializer):
+    q = serializers.CharField(required=False, allow_blank=True, default="")
+
+
 class SuaListSerializer(serializers.ModelSerializer):
     ma_hang_sua = serializers.CharField(source="hang_sua_id", read_only=True)
     ten_hang_sua = serializers.CharField(source="hang_sua.ten_hang_sua", read_only=True)
@@ -88,6 +92,56 @@ class DanhMucSanPhamSerializer(serializers.ModelSerializer):
             "hien_thi",
             "ma_loai_sua",
         ]
+
+
+class DanhMucGoiYSerializer(serializers.ModelSerializer):
+    ma_loai_sua = serializers.CharField(source="loai_sua_id", read_only=True)
+    ten_loai_sua = serializers.CharField(source="loai_sua.ten_loai_sua", read_only=True)
+    ma_sua_dai_dien = serializers.SerializerMethodField()
+    hinh_dai_dien = serializers.SerializerMethodField()
+    tieu_de_hien_thi = serializers.SerializerMethodField()
+
+    class Meta:
+        model = DanhMucSanPham
+        fields = [
+            "ma_danh_muc",
+            "ten_danh_muc",
+            "ma_loai_sua",
+            "ten_loai_sua",
+            "tieu_de_hien_thi",
+            "ma_sua_dai_dien",
+            "hinh_dai_dien",
+        ]
+
+    def _san_pham_dai_dien(self, obj):
+        for san_pham in obj.san_pham.all():
+            if san_pham.hinh:
+                return san_pham
+        return obj.san_pham.first()
+
+    def get_ma_sua_dai_dien(self, obj):
+        san_pham = self._san_pham_dai_dien(obj)
+        if san_pham is None:
+            return None
+        return san_pham.ma_sua
+
+    def get_hinh_dai_dien(self, obj):
+        san_pham = self._san_pham_dai_dien(obj)
+        if san_pham is None:
+            return None
+        request = self.context.get("request")
+        if not san_pham.hinh:
+            return None
+        if request is None:
+            return san_pham.hinh.url
+        return request.build_absolute_uri(san_pham.hinh.url)
+
+    def get_tieu_de_hien_thi(self, obj):
+        if obj.ten_danh_muc:
+            return obj.ten_danh_muc
+        if obj.loai_sua_id:
+            return obj.loai_sua.ten_loai_sua
+        return ""
 
 
 class ChiTietDanhMucSanPhamSerializer(serializers.ModelSerializer):

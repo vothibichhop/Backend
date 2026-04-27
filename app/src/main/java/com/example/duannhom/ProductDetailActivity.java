@@ -3,11 +3,11 @@ package com.example.duannhom;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
@@ -22,7 +22,12 @@ public class ProductDetailActivity extends AppCompatActivity {
 
     private int quantity = 1;
     private long currentPriceValue = 0;
-    private TextView tvQuantity, tvProductName, tvProductPrice, tvProductDesc, tvSpecification, tvToolbarTitle;
+    private TextView tvQuantity;
+    private TextView tvProductName;
+    private TextView tvProductPrice;
+    private TextView tvProductDesc;
+    private TextView tvSpecification;
+    private TextView tvToolbarTitle;
     private ImageView ivProduct;
     private Button btnAddToCart;
     private Product currentProduct;
@@ -37,7 +42,6 @@ public class ProductDetailActivity extends AppCompatActivity {
 
         apiService = RetrofitClient.getClient().create(ApiService.class);
 
-        // Ánh xạ View
         ImageView btnBack = findViewById(R.id.btnBack);
         TextView btnPlus = findViewById(R.id.btnPlus);
         TextView btnMinus = findViewById(R.id.btnMinus);
@@ -56,8 +60,16 @@ public class ProductDetailActivity extends AppCompatActivity {
         }
 
         btnBack.setOnClickListener(v -> finish());
-        btnPlus.setOnClickListener(v -> { quantity++; updateCartButton(); });
-        btnMinus.setOnClickListener(v -> { if (quantity > 1) { quantity--; updateCartButton(); } });
+        btnPlus.setOnClickListener(v -> {
+            quantity++;
+            updateCartButton();
+        });
+        btnMinus.setOnClickListener(v -> {
+            if (quantity > 1) {
+                quantity--;
+                updateCartButton();
+            }
+        });
 
         btnAddToCart.setOnClickListener(v -> {
             if (currentProduct != null) {
@@ -71,7 +83,6 @@ public class ProductDetailActivity extends AppCompatActivity {
         String cartId = prefs.getString(KEY_CART_ID, null);
 
         if (cartId == null) {
-            // Nếu chưa có giỏ hàng, gọi API tạo mới
             apiService.createCart().enqueue(new Callback<CartResponse>() {
                 @Override
                 public void onResponse(Call<CartResponse> call, Response<CartResponse> response) {
@@ -80,13 +91,13 @@ public class ProductDetailActivity extends AppCompatActivity {
                         prefs.edit().putString(KEY_CART_ID, newCartId).apply();
                         addToCartOnServer(newCartId);
                     } else {
-                        Toast.makeText(ProductDetailActivity.this, "Không thể tạo giỏ hàng", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ProductDetailActivity.this, "Khong the tao gio hang", Toast.LENGTH_SHORT).show();
                     }
                 }
 
                 @Override
                 public void onFailure(Call<CartResponse> call, Throwable t) {
-                    Toast.makeText(ProductDetailActivity.this, "Lỗi kết nối khi tạo giỏ", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ProductDetailActivity.this, "Loi ket noi khi tao gio", Toast.LENGTH_SHORT).show();
                 }
             });
         } else {
@@ -95,37 +106,33 @@ public class ProductDetailActivity extends AppCompatActivity {
     }
 
     private void addToCartOnServer(String cartId) {
-        CartItem item = new CartItem(
+        AddToCartRequest request = new AddToCartRequest(
                 currentProduct.id,
-                currentProduct.imageUrl,
-                currentProduct.name,
-                currentProduct.specification,
-                currentPriceValue,
+                resolveSelectedOptionId(),
                 quantity
         );
 
-        apiService.addProductToCart(cartId, item).enqueue(new Callback<Void>() {
+        apiService.addProductToCart(cartId, request).enqueue(new Callback<CartResponse>() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                if (response.isSuccessful()) {
-                    CartManager.getInstance().addToCart(item);
+            public void onResponse(Call<CartResponse> call, Response<CartResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    CartManager.getInstance().syncCart(response.body());
                     Intent intent = new Intent(ProductDetailActivity.this, MainActivity.class);
                     intent.putExtra("show_success", true);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     startActivity(intent);
                     finish();
                 } else if (response.code() == 404) {
-                    // Nếu giỏ hàng hết hạn hoặc không tìm thấy trên server, xóa ID cũ và thử lại
                     getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit().remove(KEY_CART_ID).apply();
                     checkAndAddToCart();
                 } else {
-                    Toast.makeText(ProductDetailActivity.this, "Lỗi: " + response.code(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ProductDetailActivity.this, "Loi: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                Toast.makeText(ProductDetailActivity.this, "Lỗi kết nối server", Toast.LENGTH_SHORT).show();
+            public void onFailure(Call<CartResponse> call, Throwable t) {
+                Toast.makeText(ProductDetailActivity.this, "Loi ket noi server", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -139,22 +146,31 @@ public class ProductDetailActivity extends AppCompatActivity {
                     displayProductData(currentProduct);
                 }
             }
+
             @Override
-            public void onFailure(Call<Product> call, Throwable t) {}
+            public void onFailure(Call<Product> call, Throwable t) {
+            }
         });
     }
 
     private void displayProductData(Product product) {
-        if (tvProductName != null) tvProductName.setText(product.name);
-        if (tvToolbarTitle != null) tvToolbarTitle.setText(product.name);
-        if (tvProductDesc != null) tvProductDesc.setText(product.description);
-        if (tvSpecification != null) tvSpecification.setText(product.specification);
-        
-        try {
-            String cleanPrice = product.price.replaceAll("[^0-9]", "");
-            currentPriceValue = Long.parseLong(cleanPrice);
-        } catch (Exception e) {
-            currentPriceValue = 0;
+        if (tvProductName != null) {
+            tvProductName.setText(product.name);
+        }
+        if (tvToolbarTitle != null) {
+            tvToolbarTitle.setText(product.name);
+        }
+        if (tvProductDesc != null) {
+            tvProductDesc.setText(product.description);
+        }
+        if (tvSpecification != null) {
+            tvSpecification.setText(resolveDisplaySpecification(product));
+        }
+
+        currentPriceValue = resolveCurrentPrice(product);
+        if (tvProductPrice != null) {
+            DecimalFormat formatter = new DecimalFormat("#,###");
+            tvProductPrice.setText(formatter.format(currentPriceValue).replace(",", ".") + "\u0111");
         }
 
         String imgUrl = product.imageUrl;
@@ -168,13 +184,73 @@ public class ProductDetailActivity extends AppCompatActivity {
         updateCartButton();
     }
 
+    private Integer resolveSelectedOptionId() {
+        if (currentProduct == null || currentProduct.options == null || currentProduct.options.isEmpty()) {
+            return null;
+        }
+
+        for (Product.ProductOption option : currentProduct.options) {
+            if (option != null && option.isDefault && option.id != null) {
+                return option.id;
+            }
+        }
+
+        for (Product.ProductOption option : currentProduct.options) {
+            if (option != null && option.id != null) {
+                return option.id;
+            }
+        }
+
+        return null;
+    }
+
+    private long resolveCurrentPrice(Product product) {
+        if (product != null && product.options != null) {
+            for (Product.ProductOption option : product.options) {
+                if (option != null && option.isDefault) {
+                    return option.priceValue;
+                }
+            }
+            for (Product.ProductOption option : product.options) {
+                if (option != null && option.priceValue > 0) {
+                    return option.priceValue;
+                }
+            }
+        }
+
+        try {
+            String cleanPrice = product.price.replaceAll("[^0-9]", "");
+            return Long.parseLong(cleanPrice);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    private String resolveDisplaySpecification(Product product) {
+        if (product != null && product.options != null) {
+            for (Product.ProductOption option : product.options) {
+                if (option != null && option.isDefault && option.optionName != null) {
+                    return option.optionName;
+                }
+            }
+            for (Product.ProductOption option : product.options) {
+                if (option != null && option.optionName != null) {
+                    return option.optionName;
+                }
+            }
+        }
+        return product != null ? product.specification : "";
+    }
+
     private void updateCartButton() {
-        if (tvQuantity != null) tvQuantity.setText(String.valueOf(quantity));
+        if (tvQuantity != null) {
+            tvQuantity.setText(String.valueOf(quantity));
+        }
         long totalPrice = quantity * currentPriceValue;
         DecimalFormat formatter = new DecimalFormat("#,###");
-        String formattedPrice = formatter.format(totalPrice).replace(",", ".") + "đ";
+        String formattedPrice = formatter.format(totalPrice).replace(",", ".") + "\u0111";
         if (btnAddToCart != null) {
-            btnAddToCart.setText(formattedPrice + " | Thêm vào giỏ");
+            btnAddToCart.setText(formattedPrice + " | Them vao gio");
         }
     }
 }

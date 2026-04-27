@@ -8,8 +8,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
     private static Retrofit retrofit = null;
-    
-    // Đã cập nhật Port từ 8000 sang 8001 và dùng IP 10.0.3.2 cho Genymotion
+
+    // Genymotion maps the host machine to 10.0.3.2.
     private static final String BASE_URL = "http://10.0.3.2:8000/";
 
     public static Retrofit getClient() {

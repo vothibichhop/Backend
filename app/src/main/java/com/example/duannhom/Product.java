@@ -1,6 +1,7 @@
 package com.example.duannhom;
 
 import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 public class Product {
@@ -13,7 +14,7 @@ public class Product {
     @SerializedName("don_gia")
     public String price;
 
-    @SerializedName("nhan_giam_gia") // Thêm lại trường này để fix lỗi trong Adapter
+    @SerializedName("nhan_giam_gia")
     public String discount;
 
     @SerializedName("hinh")
@@ -21,25 +22,29 @@ public class Product {
 
     @SerializedName("quy_cach")
     public String specification;
-    
+
     @SerializedName("mo_ta_chi_tiet")
     public String description;
 
     @SerializedName("lua_chon_mua")
     public List<ProductOption> options;
 
-    public Product() {}
+    public Product() {
+    }
 
     public static class ProductOption {
+        @SerializedName("id")
+        public Integer id;
+
         @SerializedName("ten_lua_chon")
         public String optionName;
-        
+
         @SerializedName("gia_hien_thi")
         public String displayPrice;
-        
+
         @SerializedName("nhan_giam_gia")
         public String discountLabel;
-        
+
         @SerializedName("don_gia")
         public long priceValue;
 

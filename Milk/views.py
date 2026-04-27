@@ -1,3 +1,5 @@
+import unicodedata
+
 from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
@@ -12,12 +14,20 @@ from .serializers import (
     CapNhatChiTietGioHangSerializer,
     ChiTietSuaSerializer,
     ChiTietDanhMucSanPhamSerializer,
+    DanhMucGoiYSerializer,
+    DanhMucSanPhamSearchQuerySerializer,
     DanhMucSanPhamSerializer,
     GioHangSerializer,
     SuaListQuerySerializer,
     SuaListSerializer,
     ThemSanPhamVaoGioHangSerializer,
 )
+
+
+def _normalize_search_text(value):
+    normalized = unicodedata.normalize("NFD", value or "")
+    without_diacritics = "".join(char for char in normalized if unicodedata.category(char) != "Mn")
+    return without_diacritics.casefold().strip()
 
 
 class SuaViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
@@ -91,6 +101,35 @@ class DanhMucSanPhamViewSet(
             many=True,
             context={"request": request},
         )
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["get"], url_path="tim-kiem-loai-sua")
+    def tim_kiem_loai_sua(self, request):
+        query_serializer = DanhMucSanPhamSearchQuerySerializer(data=request.query_params)
+        query_serializer.is_valid(raise_exception=True)
+        q = query_serializer.validated_data["q"].strip()
+
+        queryset = self.get_queryset()
+        if q:
+            normalized_q = _normalize_search_text(q)
+            queryset = [
+                danh_muc
+                for danh_muc in queryset
+                if normalized_q in _normalize_search_text(danh_muc.ten_danh_muc)
+                or normalized_q in _normalize_search_text(danh_muc.mo_ta)
+                or normalized_q in _normalize_search_text(danh_muc.noi_bat)
+                or normalized_q in _normalize_search_text(
+                    danh_muc.loai_sua.ten_loai_sua if danh_muc.loai_sua else ""
+                )
+            ]
+
+        serializer = DanhMucSanPhamSerializer(queryset, many=True, context={"request": request})
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["get"], url_path="danh-cho-ban")
+    def danh_cho_ban(self, request):
+        queryset = [danh_muc for danh_muc in self.get_queryset() if danh_muc.san_pham.exists()][:3]
+        serializer = DanhMucGoiYSerializer(queryset, many=True, context={"request": request})
         return Response(serializer.data)
 
 
